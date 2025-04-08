@@ -5,7 +5,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState(null);
   const [selectedHotel, setSelectedHotel] = useState(null);
-  const [selectedFare, setSelectedFare] = useState(null); // State to track the selected fare for modal
+  const [selectedFareInfo, setSelectedFareInfo] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleSearch = () => {
@@ -39,7 +39,7 @@ export default function App() {
             fare: "Economy Flex",
             services: ["Wi-Fi", "Meal", "Seat Selection"],
             fareConditions:
-              "Full refund, seat selection included, 1 checked bag."
+              "Full refund, seat selection included, 1 checked bag.",
           },
           hotel: {
             name: "Hotel Eden",
@@ -51,7 +51,7 @@ export default function App() {
             meal: "Breakfast included",
             image: "https://via.placeholder.com/400x200.png?text=Hotel+Eden",
             details:
-              "Luxurious stay in the heart of Rome with spa and rooftop restaurant."
+              "Luxurious stay in the heart of Rome with spa and rooftop restaurant.",
           },
           price: "€964",
         },
@@ -78,7 +78,7 @@ export default function App() {
             fare: "Basic",
             services: ["Extra legroom"],
             fareConditions:
-              "No refund, paid seat selection, carry-on only."
+              "No refund, paid seat selection, carry-on only.",
           },
           hotel: {
             name: "Roma Comfort Inn",
@@ -90,7 +90,7 @@ export default function App() {
             meal: "No meals included",
             image: "https://via.placeholder.com/400x200.png?text=Roma+Inn",
             details:
-              "Comfortable stay with free Wi-Fi and close to metro."
+              "Comfortable stay with free Wi-Fi and close to metro.",
           },
           price: "€620",
         },
@@ -100,18 +100,20 @@ export default function App() {
 
   const openModal = (hotel) => {
     setSelectedHotel(hotel);
+    setSelectedFareInfo(null);
     setModalOpen(true);
   };
 
-  const openFareModal = (fareConditions) => {
-    setSelectedFare(fareConditions);
+  const openFareModal = (flight) => {
+    setSelectedFareInfo(flight);
+    setSelectedHotel(null);
     setModalOpen(true);
   };
 
   const closeModal = () => {
     setModalOpen(false);
     setSelectedHotel(null);
-    setSelectedFare(null);
+    setSelectedFareInfo(null);
   };
 
   return (
@@ -155,25 +157,20 @@ export default function App() {
                 <h2 style={{ color: "#93c5fd", fontSize: "1.25rem", fontWeight: "bold", marginBottom: "0.5rem" }}>{option.type}</h2>
                 <p style={{ fontSize: "0.9rem", color: "#9ca3af" }}>Passengers: {option.passengers}</p>
 
-                {/* Flight Details Section */}
                 <div style={{ marginTop: "1rem", marginBottom: "1rem" }}>
                   <h3 style={{ color: "#fff", fontWeight: "600", marginBottom: "0.5rem" }}><Plane size={18} /> Flight Details</h3>
                   <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
                     {option.flight.airline} {option.flight.flightNumber}: {option.flight.from} → {option.flight.to}
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
-                    Outbound: {option.flight.departure} → {option.flight.arrival}
+                    Departure: {option.flight.departure} — Arrival: {option.flight.arrival}
                   </p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
-                    Inbound: {option.flight.returnFlight.departure} → {option.flight.returnFlight.arrival}
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }} onClick={() => openFareModal(option.flight.fareConditions)}>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }} onClick={() => openFareModal(option.flight)}>
                     Fare: <span title={option.flight.fareConditions} style={{ textDecoration: "underline", cursor: "help", color: "#60a5fa" }}>{option.flight.fare}</span>
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Services: {option.flight.services.join(", ") || "None"}</p>
                 </div>
 
-                {/* Hotel Section */}
                 <div>
                   <h3 style={{ color: "#fff", fontWeight: "600", marginBottom: "0.5rem" }}><Hotel size={18} /> Hotel</h3>
                   <img
@@ -189,22 +186,19 @@ export default function App() {
                     {option.hotel.name}
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "#d1d5db" }}>{option.hotel.stars}⭐ - Rating: {option.hotel.rating}</p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
-                    {option.hotel.room} ({option.hotel.meal})
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>{option.hotel.location}</p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>{option.hotel.distance}</p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Room: {option.hotel.room}</p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Meal: {option.hotel.meal}</p>
                 </div>
 
-                {/* Price Section */}
-                <p style={{ fontSize: "1rem", fontWeight: "bold", color: "#60a5fa", marginTop: "1rem" }}>
-                  Price: {option.price}
-                </p>
+                <p style={{ color: "#4ade80", fontWeight: "bold", fontSize: "1.1rem", marginTop: "1rem" }}>{option.price}</p>
               </div>
             ))}
           </div>
         )}
 
-        {modalOpen && (
+        {/* Modal */}
+        {modalOpen && (selectedHotel || selectedFareInfo) && (
           <div
             style={{
               position: "fixed",
@@ -212,11 +206,10 @@ export default function App() {
               left: "0",
               right: "0",
               bottom: "0",
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              zIndex: "10"
             }}
             onClick={closeModal}
           >
@@ -225,47 +218,86 @@ export default function App() {
                 backgroundColor: "#1e293b",
                 padding: "2rem",
                 borderRadius: "1rem",
-                width: "80%",
-                maxWidth: "600px",
-                color: "#fff",
+                maxWidth: "800px",
+                maxHeight: "80vh",
+                overflowY: "auto",
+                position: "relative",
               }}
               onClick={(e) => e.stopPropagation()}
             >
+              <button
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  background: "none",
+                  border: "none",
+                  color: "#fff",
+                  fontSize: "1.5rem",
+                  cursor: "pointer",
+                }}
+                onClick={closeModal}
+              >
+                ×
+              </button>
+
               {selectedHotel && (
                 <>
-                  <h2 style={{ color: "#60a5fa", fontSize: "1.5rem", fontWeight: "bold" }}>
+                  <h2 style={{ color: "#93c5fd", fontSize: "1.5rem", fontWeight: "bold" }}>
                     {selectedHotel.name}
                   </h2>
-                  <p>{selectedHotel.details}</p>
-                  <p style={{ fontSize: "0.9rem", color: "#d1d5db" }}>
-                    {selectedHotel.stars}⭐ - {selectedHotel.location}
-                  </p>
-                  <p style={{ fontSize: "0.9rem", color: "#9ca3af" }}>
-                    Room: {selectedHotel.room} - {selectedHotel.meal}
-                  </p>
-                  <button
-                    onClick={closeModal}
+                  <img
+                    src={selectedHotel.image}
+                    alt={selectedHotel.name}
                     style={{
-                      backgroundColor: "#2563eb",
-                      color: "#fff",
-                      padding: "0.5rem 1rem",
+                      width: "100%",
+                      height: "300px",
+                      objectFit: "cover",
                       borderRadius: "0.5rem",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      marginTop: "1rem",
+                      marginBottom: "1rem",
                     }}
-                  >
-                    Close
-                  </button>
+                  />
+                  <p style={{ color: "#d1d5db", fontSize: "1rem" }}>{selectedHotel.details}</p>
+                  <p style={{ color: "#9ca3af", fontSize: "1rem" }}>
+                    Location: <a href={`https://www.google.com/maps?q=${selectedHotel.location}`} target="_blank" rel="noopener noreferrer">{selectedHotel.location}</a>
+                  </p>
+                  <p style={{ color: "#9ca3af", fontSize: "1rem" }}>Room: {selectedHotel.room}</p>
+                  <p style={{ color: "#9ca3af", fontSize: "1rem" }}>Meal: {selectedHotel.meal}</p>
+                  <p style={{ color: "#d1d5db", fontSize: "1rem" }}>Rating: {selectedHotel.rating}⭐</p>
                 </>
               )}
 
-              {selectedFare && (
-                <div style={{ marginTop: "2rem" }}>
-                  <h3 style={{ color: "#93c5fd" }}>Fare Conditions</h3>
-                  <p>{selectedFare}</p>
-                </div>
+              {selectedFareInfo && (
+                <>
+                  <h2 style={{ color: "#93c5fd", fontSize: "1.5rem", fontWeight: "bold" }}>
+                    {selectedFareInfo.airline} {selectedFareInfo.flightNumber}
+                  </h2>
+                  <p style={{ color: "#d1d5db", fontSize: "1rem" }}>
+                    {selectedFareInfo.from} → {selectedFareInfo.to}
+                  </p>
+                  <p style={{ color: "#9ca3af", fontSize: "1rem" }}>
+                    Departure: {selectedFareInfo.departure} — Arrival: {selectedFareInfo.arrival}
+                  </p>
+                  <p style={{ color: "#d1d5db", fontSize: "1rem" }}>
+                    Fare Conditions: {selectedFareInfo.fareConditions}
+                  </p>
+                </>
               )}
+
+              <button
+                onClick={closeModal}
+                style={{
+                  marginTop: "1rem",
+                  padding: "0.5rem 1rem",
+                  backgroundColor: "#2563eb",
+                  color: "#fff",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                }}
+              >
+                Close
+              </button>
             </div>
           </div>
         )}
