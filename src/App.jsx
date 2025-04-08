@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import { Sparkles, Plane, Hotel, Briefcase, Globe2 } from "lucide-react";
+import {
+  Sparkles,
+  Plane,
+  Hotel,
+  Briefcase,
+  Globe2
+} from "lucide-react";
 
 export default function App() {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState(null);
-  const [selectedHotel, setSelectedHotel] = useState(null);
-  const [selectedFare, setSelectedFare] = useState(null); // State to track the selected fare for modal
-  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedHotel, setSelectedHotel] = useState(null); // State to track the selected hotel for modal
+  const [modalOpen, setModalOpen] = useState(false); // State to manage the modal visibility
 
   const handleSearch = () => {
     if (!query) {
@@ -98,20 +103,16 @@ export default function App() {
     });
   };
 
+  // Function to open the modal
   const openModal = (hotel) => {
     setSelectedHotel(hotel);
     setModalOpen(true);
   };
 
-  const openFareModal = (fareConditions) => {
-    setSelectedFare(fareConditions);
-    setModalOpen(true);
-  };
-
+  // Function to close the modal
   const closeModal = () => {
     setModalOpen(false);
     setSelectedHotel(null);
-    setSelectedFare(null);
   };
 
   return (
@@ -134,9 +135,7 @@ export default function App() {
         <div style={{ background: "#1e293b", border: "1px solid #3b82f6", borderRadius: "1rem", padding: "2rem", marginBottom: "2rem" }}>
           <textarea
             placeholder="Type your travel request here like a command console..."
-            style={{
-              width: "100%", height: "100px", padding: "1rem", background: "#000", color: "#60a5fa", borderColor: "#2563eb", marginBottom: "1rem", borderRadius: "8px"
-            }}
+            style={{ width: "100%", height: "100px", padding: "1rem", background: "#000", color: "#60a5fa", borderColor: "#2563eb", marginBottom: "1rem", borderRadius: "8px" }}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -160,124 +159,109 @@ export default function App() {
                   <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}>
                     {option.flight.airline} {option.flight.flightNumber}: {option.flight.from} → {option.flight.to}
                   </p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }} onClick={() => openFareModal(option.flight.fareConditions)}>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
+                    Outbound: {option.flight.departure} – {option.flight.arrival} ({option.flight.duration})
+                  </p>
+                  <p style={{ fontSize: "0.8rem", color: "#e5e7eb" }}>
+                    {option.flight.airline} {option.flight.returnFlight.flightNumber}: {option.flight.returnFlight.from} → {option.flight.returnFlight.to}
+                  </p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
+                    Return: {option.flight.returnFlight.departure} – {option.flight.returnFlight.arrival} ({option.flight.returnFlight.duration})
+                  </p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Baggage: {option.flight.bags}</p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>
                     Fare: <span title={option.flight.fareConditions} style={{ textDecoration: "underline", cursor: "help", color: "#60a5fa" }}>{option.flight.fare}</span>
                   </p>
                   <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Services: {option.flight.services.join(", ") || "None"}</p>
                 </div>
 
-                <div>
+                <div style={{ marginBottom: "1rem" }}>
                   <h3 style={{ color: "#fff", fontWeight: "600", marginBottom: "0.5rem" }}><Hotel size={18} /> Hotel</h3>
-                  <img
-                    src={option.hotel.image}
-                    alt={option.hotel.name}
-                    style={{ width: "100%", height: "120px", objectFit: "cover", borderRadius: "0.5rem", marginBottom: "0.5rem", cursor: "pointer" }}
-                    onClick={() => openModal(option.hotel)}
-                  />
-                  <p
-                    style={{ color: "#60a5fa", textDecoration: "underline", cursor: "pointer" }}
-                    onClick={() => openModal(option.hotel)}
-                  >
-                    {option.hotel.name}
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#d1d5db" }}>{option.hotel.stars}⭐ - Rating: {option.hotel.rating}</p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>{option.hotel.distance}</p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Room: {option.hotel.room}</p>
-                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Meal: {option.hotel.meal}</p>
+                  <img src={option.hotel.image} alt="Hotel" style={{ width: "100%", height: "auto", borderRadius: "10px" }} />
+                  <p style={{ fontSize: "0.9rem", color: "#e5e7eb" }}><strong>{option.hotel.name}</strong></p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Rating: {option.hotel.rating} ★ | {option.hotel.stars} stars</p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Location: {option.hotel.location}</p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>Room: {option.hotel.room} | Meal: {option.hotel.meal}</p>
+                  <p style={{ fontSize: "0.8rem", color: "#e5e7eb" }}>Distance: {option.hotel.distance}</p>
+                  <p style={{ fontSize: "0.8rem", color: "#9ca3af" }}>{option.hotel.details}</p>
                 </div>
 
-                <p style={{ color: "#4ade80", fontWeight: "bold", fontSize: "1.1rem", marginTop: "1rem" }}>{option.price}</p>
+                <div style={{ marginTop: "2rem", textAlign: "center" }}>
+                  <p style={{ fontSize: "1.25rem", color: "#60a5fa" }}>Total Price: {option.price}</p>
+                  <button
+                    onClick={() => openModal(option.hotel)}
+                    style={{ backgroundColor: "#60a5fa", color: "#fff", padding: "1rem 2rem", borderRadius: "10px", fontWeight: "bold" }}
+                  >
+                    View More
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
 
         {/* Modal to show hotel details */}
-        {modalOpen && (selectedHotel || selectedFare) && (
+        {modalOpen && selectedHotel && (
           <div
             style={{
               position: "fixed",
-              top: "0",
-              left: "0",
-              right: "0",
-              bottom: "0",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               backgroundColor: "rgba(0, 0, 0, 0.7)",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              zIndex: 1000,
             }}
             onClick={closeModal}
           >
             <div
               style={{
                 backgroundColor: "#1e293b",
+                color: "#fff",
                 padding: "2rem",
-                borderRadius: "1rem",
-                maxWidth: "800px",
-                maxHeight: "80vh",
-                overflowY: "auto",
+                borderRadius: "10px",
+                width: "80%",
+                maxWidth: "600px",
                 position: "relative",
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <button
+              <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "1rem" }}>{selectedHotel.name}</h2>
+              <p style={{ marginBottom: "1rem" }}>{selectedHotel.details}</p>
+              <img
+                src={selectedHotel.image}
+                alt={selectedHotel.name}
                 style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  background: "none",
-                  border: "none",
-                  color: "#fff",
-                  fontSize: "1.5rem",
-                  cursor: "pointer",
-                }}
-                onClick={closeModal}
-              >
-                ×
-              </button>
-
-              {selectedHotel && (
-                <>
-                  <h2 style={{ color: "#93c5fd", fontSize: "1.5rem", fontWeight: "bold" }}>
-                    {selectedHotel.name}
-                  </h2>
-                  <img
-                    src={selectedHotel.image}
-                    alt={selectedHotel.name}
-                    style={{
-                      width: "100%",
-                      height: "300px",
-                      objectFit: "cover",
-                      borderRadius: "0.5rem",
-                      marginBottom: "1rem",
-                    }}
-                  />
-                  <p style={{ color: "#d1d5db", fontSize: "1rem" }}>{selectedHotel.details}</p>
-                  <p style={{ color: "#9ca3af", fontSize: "1rem" }}>
-                    Location: <a href={`https://www.google.com/maps?q=${selectedHotel.location}`} target="_blank" rel="noopener noreferrer">{selectedHotel.location}</a>
-                  </p>
-                  <p style={{ color: "#9ca3af", fontSize: "1rem" }}>Room: {selectedHotel.room}</p>
-                  <p style={{ color: "#9ca3af", fontSize: "1rem" }}>Meal: {selectedHotel.meal}</p>
-                  <p style={{ color: "#d1d5db", fontSize: "1rem" }}>Rating: {selectedHotel.rating}⭐</p>
-                </>
-              )}
-
-              {selectedFare && (
-                <p style={{ color: "#d1d5db", fontSize: "1rem" }}>
-                  Fare Conditions: {selectedFare}
-                </p>
-              )}
-
-              <button
-                onClick={closeModal}
-                style={{
-                  marginTop: "1rem",
-                  padding: "0.5rem 1rem",
-                  backgroundColor: "#2563eb",
-                  color: "#fff",
+                  width: "100%",
+                  height: "auto",
                   borderRadius: "8px",
-                  cursor: "pointer",
+                  marginBottom: "1rem",
+                }}
+              />
+              <p style={{ fontSize: "0.9rem" }}>
+                <strong>Rating:</strong> {selectedHotel.rating} ★ | {selectedHotel.stars} stars
+              </p>
+              <p style={{ fontSize: "0.9rem" }}>
+                <strong>Location:</strong> {selectedHotel.location}
+              </p>
+              <p style={{ fontSize: "0.9rem" }}>
+                <strong>Room:</strong> {selectedHotel.room} | <strong>Meal:</strong> {selectedHotel.meal}
+              </p>
+              <button
+                onClick={closeModal}
+                style={{
+                  backgroundColor: "#60a5fa",
+                  color: "#fff",
+                  padding: "0.5rem 1.5rem",
+                  borderRadius: "8px",
                   fontWeight: "bold",
+                  marginTop: "1rem",
+                  display: "block",
+                  width: "100%",
+                  cursor: "pointer",
                 }}
               >
                 Close
